@@ -11,10 +11,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Update Ubuntu and Install Dependencies
+    - name: Update Repositories and Install Dependencies
       run: |
         sudo apt update
-        sudo apt upgrade
         sudo apt install git
         
     - name: Retrieve JHU CSSE Data
