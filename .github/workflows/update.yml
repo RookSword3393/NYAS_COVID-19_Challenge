@@ -1,0 +1,27 @@
+name: Update Repo
+
+on:
+  schedule:
+    - cron:  '0 0 * * *'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Update Ubuntu and Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt upgrade
+        sudo apt install git
+        
+    - name: Retrieve JHU CSSE Data
+      run: git clone https://github.com/CSSEGISandData/COVID-19.git
+    
+    - name: Modify Repository
+      run: cd COVID-19/csse_covid_19_data/csse_covid_19_daily_reports ; mv `date "+%m-%d-%Y" -d "yesterday"`".csv" ../../../
+        
+    - name: Push Changes 
+      run: chmod +x commit.sh ; ./commit.sh ${GITHUB_REF##*/}
+    
