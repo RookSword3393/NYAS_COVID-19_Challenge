@@ -1,3 +1,7 @@
-The COVID-19 data in this repository is not owned by me. 
-I copied the data from Johns Hopkins University's repository to allow me to link it as a single source for my program.
-Pls don't sue me.
+# JHU - Data Retrieval
+
+This is a standalone repository to push the latest data to a singular file.
+Data is pulled from John Hopkins University's repository. 
+
+Data Source:
+```https://github.com/CSSEGISandData/COVID-19.git```
