@@ -1,0 +1,86 @@
+dataset = Import["https://raw.githubusercontent.com/RookSword3393/CoronaGO/master/currentreport.csv", "Dataset"];
+
+fipsrules = Import["http://pastebin.com/raw/YSsKAbjn"];
+
+fipsc = Normal @dataset[[All, 1]];
+activec = Normal@dataset[[All, 11]];
+
+fipsc = IntegerString /@ fipsc[[2 ;; (Flatten[Position[Normal /@ dataset[[All, 4]], "Canada"]][[1]] - 1)]];
+activec = activec[[2 ;; (Flatten[Position[Normal /@ dataset[[All, 4]], "Canada"]][[1]] - 1)]];
+
+countyc = fipsc /. fipsrules [[1]];
+
+allcounties = Cases[EntityList@Entity["AdministrativeDivision", {"Country" -> Entity["Country", "UnitedStates"]}], Entity[_, {_, _, _}]];
+
+regions = Thread[countyc -> activec];
+
+regions = Drop[regions, {Flatten[Position[dataset[[All, 2]], "Unassigned"]][[1]], Flatten[Position[dataset[[All, 2]], "Unassigned"]][[-1]]}];
+noncountyc = Select[allcounties, MemberQ[countyc, #] == False &];
+c = Table[0, Length[noncountyc]];
+regions = Join[regions, Thread[noncountyc -> c]];
+
+alaska = {};
+hawaii = {};
+
+For[i = 1, i <= Length[regions], i++, 
+ If[MatchQ[regions[[i]], 
+   Entity["AdministrativeDivision", {__, "Alaska", __}] -> __] , 
+  AppendTo[alaska, regions[[i]]] ]]
+For[i = 1, i <= Length[regions], i++, 
+ If[MatchQ[regions[[i]], 
+   Entity["AdministrativeDivision", {__, "Hawaii", __}] -> __] , 
+  AppendTo[hawaii, regions[[i]]] ]]
+
+regions = DeleteCases[regions, Entity["AdministrativeDivision", {__, "Hawaii", __}] -> __];
+regions = DeleteCases[regions, Entity["AdministrativeDivision", {__, "Alaska", __}] -> __];
+
+getColor = Which[0 <= # <= 50, RGBColor[1, 1., 0.5],
+    50 < # <= 100, RGBColor[1, 0.95, 0.4],
+    100 < # <= 200, RGBColor[1, 0.9, 0.3],
+    200 < # <= 300, RGBColor[1, 0.85, 0.2],
+    300 < # <= 400, RGBColor[1, 0.8, 0.1],
+    400 < # <= 500, RGBColor[1, 0.75, 0],
+    500 < # <= 600, RGBColor[1, 0.7, 0],
+    600 < # <= 700, RGBColor[1, 0.65, 0],
+    700 < # <= 800, RGBColor[1, 0.6, 0],
+    800 < # <= 900, RGBColor[1, 0.55, 0],
+    900 < # <= 1000, RGBColor[1, 0.5, 0],
+    1000 < # <= 1500, RGBColor[1, 0.45, 0],
+    1500 < # <= 2000, RGBColor[1, 0.4, 0],
+    2000 < # <= 3000, RGBColor[0.95, 0.35, 0],
+    3000 < # <= 5000, RGBColor[0.9, 0.3, 0],
+    5000 < # <= 10000, RGBColor[0.85, 0.25, 0],
+    10000 < # <= 25000, RGBColor[0.8, 0.2, 0], 
+    25000 < # <= 50000, RGBColor[0.75, 0.15, 0],
+    50000 < # <= 100000, RGBColor[0.7, 0.1, 0],
+    100000 < # , RGBColor[0.65, 0, 0]] &;
+
+StateMap[state_String] := (If[MemberQ[{"Hawaii", "Alaska"}, state] == True,
+   If[state == "Hawaii", 
+    GeoRegionValuePlot[hawaii, ImageSize -> Large, 
+     ColorFunction -> getColor, ColorFunctionScaling -> False], 
+    GeoRegionValuePlot[alaska, ImageSize -> Large, 
+     ColorFunction -> getColor, ColorFunctionScaling -> False]],
+   mg = {};
+   For[i = 1, i <= Length[regions], i++, 
+    If[MatchQ[regions[[i]], 
+      Entity["AdministrativeDivision", {__, state, __}] -> __] , 
+     AppendTo[mg, regions[[i]]] ]];
+   GeoRegionaluePlot[mg, ColorFunction -> getColor, 
+    ColorFunctionScaling -> False]])
+    
+MainlandMap[usa_String] := GeoRegionValuePlot[regions, ImageSize -> Large, 
+  ColorFunction -> getColor, ColorFunctionScaling -> False]
+
+CoordinateCases[xpos_, ypos_, rad_] := (lst = GeoNearest[Cases[EntityList@Entity["AdministrativeDivision", {"Country" -> Entity["Country", "UnitedStates"]}], Entity[_, {_, _}]], eoPosition[{xpos, ypos}], {All, Quantity[1000 * rad, "Meters"]}];
+  finali = {};
+  For[i = 1, i <= Length[lst], i++, AppendTo[finali, lst[[i]]["Subdivisions"]]];
+  finali = Flatten[finali];
+  final = GeoNearest[finali, GeoPosition[{xpos, ypos}], {All, Quantity[1000 * rad, "Meters"]}];
+  final3 = {};
+  For[i = 1, i <= Length[final], i++, AppendTo[final3, 
+    regions[[Position[regions, final[[i]] -> __][[1]]]]]];
+  map = GeoRegionValuePlot[Flatten[final3], ColorFunction -> getColor, ColorFunctionScaling -> False])
+
+CoordinateCases[40.71, -74, 100]
+MainlandMap["USA"]
