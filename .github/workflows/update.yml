@@ -22,5 +22,5 @@ jobs:
       run: cd COVID-19/csse_covid_19_data/csse_covid_19_daily_reports ; mv `date "+%m-%d-%Y" -d "2 day ago"`".csv" ../../../currentreport.csv
         
     - name: Push Changes 
-      run: cd .github/workflows/ ; chmod +x commit.sh ; ./commit.sh ${GITHUB_REF##*/} date "+%m-%d-%Y" -d "2 day ago"
+      run: cd .github/workflows/ ; chmod +x commit.sh ; ./commit.sh ${GITHUB_REF##*/} `date "+%m-%d-%Y" -d "2 day ago"`
     
