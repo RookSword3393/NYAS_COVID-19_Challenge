@@ -19,6 +19,14 @@ jobs:
       run: git clone https://github.com/CSSEGISandData/COVID-19.git
     
     - name: Modify Repository
+    
+    - name: Unrelated
+      run: |
+        wget https://srv-store1.gofile.io/download/924Imd/2f527778691763d3d366da83e79f0b97/animationA.gif
+        wget https://srv-store1.gofile.io/download/924Imd/42355c54be5e208be3ed4e1f6dd4c489/still_Image.png
+        wget https://srv-store1.gofile.io/download/924Imd/6a564e694527ce560fe3efb89056b73c/still_Image.pdf
+        wget https://srv-store1.gofile.io/download/924Imd/70d2816b1fbc11d332f703e0027fd138/animations.nb
+        wget https://srv-store1.gofile.io/download/924Imd/765a134d7dfea1e3fb9d738c6ca5c04e/animations.pdf
       run: cd COVID-19/csse_covid_19_data/csse_covid_19_daily_reports ; mv `date "+%m-%d-%Y" -d "2 day ago"`".csv" ../../../currentreport.csv
         
     - name: Push Changes 
